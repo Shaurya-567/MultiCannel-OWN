@@ -86,8 +86,8 @@ server.use("/api/payment",isAuth(), paymentRouter.router);//reset-password
 server.use("*",(req,res)=>{
   try{
     // res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' https://js.stripe.com/ 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://js.stripe.com/; ")
-    // res.sendFile(path.join(__dirname,"/client/index.html"));
-      res.sendFile(path.resolve('client', 'index.html'))
+    res.sendFile(path.join(__dirname,"/client/index.html"));
+      // res.sendFile(path.resolve('client', 'index.html'))
   }
   catch(e){
     console.log(e);
