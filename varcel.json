@@ -1,5 +1,9 @@
 {
   "version":2,
+  "installCommand": "npm install",
+  "outputDirectory": "client",
+  "public": true,
+  "name": "example-app",
   "builds": [
     {
       "src": "index.js",
