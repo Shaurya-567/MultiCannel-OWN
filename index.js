@@ -5,7 +5,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-
+const cluster = require('cluster');
+const os = require('os');
 const productRouter = require("./routes/Products");
 const morgan = require('morgan');
 const session = require('express-session');
@@ -25,15 +26,27 @@ const {isAuth, authPassportServices,cookieExtractor,JwtSecretKey} =require("./mi
 dotenv.config();
 const PORT = process.env.PORT || 5004;
 const MONGO_URL = process.env.MONGO_URL || "";
-
+let numCPUs = os.cpus().length;
 // Config Database Configuration
 mongoConnection().catch(err => console.error(err));
 async function mongoConnection(){
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
 } 
-// middleware
-server.use(cors({
+
+if (cluster.isPrimary) {
+  console.log(`Primary ${process.pid} is running`);
+
+  // Fork workers.
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} died`);
+  });
+} else {
+  server.use(cors({
     exposedHeaders:['X-Total-Count']
 }));
 // server.use(express.raw({type:"application/json"}))
@@ -105,3 +118,8 @@ authPassportServices(opts);
 server.listen(PORT,() => {
     console.log(`Server listening on ${PORT}`);
 })
+console.log(`Worker ${process.pid} started`);
+
+}
+
+// middleware
